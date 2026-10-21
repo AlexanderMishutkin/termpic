@@ -4,6 +4,7 @@ Modes:
   ansi   truecolor half-blocks (▀), 2 pixels per cell; needs a real terminal.
   emoji  colored squares (🟥🟩🟦…); survives markdown, so it can be pasted into chat.
   ascii  grayscale character ramp; plain text, works anywhere.
+  blocks grayscale shade blocks (░▒▓█); plain text, denser than ascii.
 """
 
 from __future__ import annotations
@@ -17,6 +18,12 @@ import sys
 from PIL import Image, ImageOps
 
 ASCII_RAMP = " .:-=+*#%@"
+BLOCK_RAMP = " ░▒▓█"
+
+# ⬛/⬜ default to text presentation and render as small outlined glyphs in many fonts,
+# so black is a 2-column blank and white a 2-column full block.
+EMOJI_BLACK = "\u3000"
+EMOJI_WHITE = "██"
 
 # Terminal cells are roughly twice as tall as they are wide.
 CELL_ASPECT = 0.5
@@ -103,9 +110,9 @@ def _percentile(sorted_values: list[float], q: float) -> float:
 def _emoji_for(hue: float, sat: float, val: float) -> str:
     """Pick a square by hue; `sat`/`val` are already normalized to the image's own range."""
     if val < 0.12:
-        return "⬛"
+        return EMOJI_BLACK
     if sat < 0.28:
-        return "⬛" if val < 0.35 else "🟫" if val < 0.5 else "⬜"
+        return EMOJI_BLACK if val < 0.35 else "🟫" if val < 0.5 else EMOJI_WHITE
     deg = hue * 360
     if deg < 18 or deg >= 330:
         return "🟥" if val > 0.35 else "🟫"
@@ -137,11 +144,11 @@ def render_emoji(img: Image.Image, cols: int, max_rows: int | None) -> str:
     )
 
 
-def render_ascii(img: Image.Image, cols: int, max_rows: int | None, invert: bool) -> str:
-    small = ImageOps.autocontrast(_fit(img, cols, max_rows, CELL_ASPECT).convert("L"), cutoff=2)
+def render_ascii(img: Image.Image, cols: int, max_rows: int | None, invert: bool, ramp: str = ASCII_RAMP) -> str:
+    small = ImageOps.equalize(_fit(img, cols, max_rows, CELL_ASPECT).convert("L"))
     w, h = small.size
     px = small.load()
-    ramp = ASCII_RAMP[::-1] if invert else ASCII_RAMP
+    ramp = ramp[::-1] if invert else ramp
     last = len(ramp) - 1
     return "\n".join(
         "".join(ramp[px[x, y] * last // 255] for x in range(w)).rstrip() for y in range(h)
@@ -151,7 +158,7 @@ def render_ascii(img: Image.Image, cols: int, max_rows: int | None, invert: bool
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(prog="termpic", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("image")
-    p.add_argument("-m", "--mode", choices=["ansi", "emoji", "ascii"], default="ansi")
+    p.add_argument("-m", "--mode", choices=["ansi", "emoji", "ascii", "blocks"], default="ansi")
     p.add_argument("-w", "--width", type=int, help="columns to use (default: terminal width)")
     p.add_argument("-f", "--fraction", type=float, default=1.0, help="share of terminal width when -w is not given")
     p.add_argument("-H", "--max-rows", type=int, help="cap output height in text rows")
@@ -167,6 +174,8 @@ def main(argv: list[str] | None = None) -> None:
         out = render_ansi(img, cols, args.max_rows)
     elif args.mode == "emoji":
         out = render_emoji(img, cols, args.max_rows)
+    elif args.mode == "blocks":
+        out = render_ascii(img, cols, args.max_rows, args.invert, BLOCK_RAMP)
     else:
         out = render_ascii(img, cols, args.max_rows, args.invert)
     print(out)

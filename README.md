@@ -7,6 +7,7 @@ when all you have is a terminal or a chat that only renders text.
 |---------|--------------------------|-------------------------------------------------|
 | `ansi`  | truecolor `▀` half-blocks | a real terminal (`! termpic img.png` in Claude Code) |
 | `emoji` | 🟥🟧🟨🟩🟦🟪🟫⬛⬜        | anywhere emoji render, incl. markdown/chat       |
+| `blocks`| ` ░▒▓█`                  | anywhere, monochrome, denser                     |
 | `ascii` | ` .:-=+*#%@`             | anywhere, monochrome                             |
 
 ## Run

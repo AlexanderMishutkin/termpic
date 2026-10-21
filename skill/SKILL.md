@@ -19,7 +19,11 @@ uv run --project "$TERMPIC_DIR" termpic <image> -m emoji -f 0.25
   plain lines, **not** in a code block (code blocks can break emoji width). 9 colors picked
   by hue with brightness stretched to the image's own range, so it's a color-blocking
   preview, not a photo.
-- **ascii**: monochrome, finer detail. Paste inside a ```` ``` ```` code block.
+  Black is rendered as an ideographic space and white as `██`, since ⬛/⬜ show up as
+  small outlined glyphs in many terminal fonts.
+- **blocks**: monochrome shade blocks `░▒▓█`, finest detail of the text modes; histogram-
+  equalized, so dark photos keep texture. Paste inside a ```` ``` ```` code block.
+- **ascii**: like blocks but with ` .:-=+*#%@`, for places where block glyphs don't render.
 - **ansi**: truecolor escape codes; your reply text can't carry them. Instead tell the user
   to run `! uv run --project <dir> termpic <image>` so it prints in their terminal directly.
 
