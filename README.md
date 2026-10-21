@@ -18,7 +18,8 @@ uv run termpic image.jpg -m emoji -w 60          # 30 emoji wide
 uv run termpic image.png -m ascii -w 80 -H 30    # cap at 30 rows
 ```
 
-Width defaults to `$COLUMNS`, then the attached terminal, then 80.
+Width defaults to `$COLUMNS`, then the attached terminal, then the nearest ancestor
+process's terminal (so it works from captured subprocesses), then 80. `-f 0.3` uses 30% of it.
 
 ## Claude Code skill
 
