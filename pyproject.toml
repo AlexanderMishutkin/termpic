@@ -1,0 +1,14 @@
+[project]
+name = "termpic"
+version = "0.1.0"
+description = "Render PNG/JPG as low-res terminal previews: truecolor half-blocks, emoji squares or ASCII."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["pillow>=10"]
+
+[project.scripts]
+termpic = "termpic:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
